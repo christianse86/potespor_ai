@@ -17,11 +17,11 @@ output "storage_container_name" {
   value       = azurerm_storage_container.images.name
 }
 
-# Function App outputs
-output "function_app_name" {
-  description = "Navnet på Function App"
-  value       = azurerm_windows_function_app.function.name
-}
+# # Function App outputs
+# output "function_app_name" {
+#   description = "Navnet på Function App"
+#   value       = azurerm_windows_function_app.function.name
+# }
 
 output "function_app_hostname" {
   description = "Hostname for Function App"

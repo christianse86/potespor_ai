@@ -13,7 +13,6 @@ resource "azurerm_subnet" "endpoint_subnet" {
   resource_group_name  = azurerm_resource_group.rg.name
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = ["10.0.1.0/24"]
-
   service_endpoints    = ["Microsoft.Storage", "Microsoft.Web"]
 }
 
@@ -22,29 +21,65 @@ resource "azurerm_subnet" "apim_subnet" {
   resource_group_name  = azurerm_resource_group.rg.name
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = ["10.0.2.0/24"]
-
   service_endpoints    = ["Microsoft.ApiManagement"]
+}
+
+# Network Security Groups
+resource "azurerm_network_security_group" "endpoint_nsg" {
+  name                = "nsg-endpoints-${var.project_name}-${var.environment}"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+
+  security_rule {
+    name                       = "AllowInboundPrivateEndpoints"
+    priority                   = 100
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range         = "*"
+    destination_port_range    = "*"
+    source_address_prefix     = "VirtualNetwork"
+    destination_address_prefix = "VirtualNetwork"
+  }
+  
+  tags = local.common_tags
+}
+
+resource "azurerm_network_security_group" "apim_nsg" {
+  name                = "nsg-apim-${var.project_name}-${var.environment}"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+
+  tags = local.common_tags
+}
+
+# NSG Associations
+resource "azurerm_subnet_network_security_group_association" "endpoint_nsg_association" {
+  subnet_id                 = azurerm_subnet.endpoint_subnet.id
+  network_security_group_id = azurerm_network_security_group.endpoint_nsg.id
+}
+
+resource "azurerm_subnet_network_security_group_association" "apim_nsg_association" {
+  subnet_id                 = azurerm_subnet.apim_subnet.id
+  network_security_group_id = azurerm_network_security_group.apim_nsg.id
 }
 
 # Private DNS Zones
 resource "azurerm_private_dns_zone" "storage_zone" {
   name                = "privatelink.blob.core.windows.net"
   resource_group_name = azurerm_resource_group.rg.name
-  
   tags = local.common_tags
 }
 
 resource "azurerm_private_dns_zone" "function_zone" {
   name                = "privatelink.azurewebsites.net"
   resource_group_name = azurerm_resource_group.rg.name
-  
   tags = local.common_tags
 }
 
 resource "azurerm_private_dns_zone" "openai_zone" {
   name                = "privatelink.openai.azure.com"
   resource_group_name = azurerm_resource_group.rg.name
-  
   tags = local.common_tags
 }
 
@@ -55,7 +90,6 @@ resource "azurerm_private_dns_zone_virtual_network_link" "storage_zone_link" {
   private_dns_zone_name = azurerm_private_dns_zone.storage_zone.name
   virtual_network_id    = azurerm_virtual_network.vnet.id
   registration_enabled  = false
-  
   tags = local.common_tags
 }
 
@@ -65,7 +99,6 @@ resource "azurerm_private_dns_zone_virtual_network_link" "function_zone_link" {
   private_dns_zone_name = azurerm_private_dns_zone.function_zone.name
   virtual_network_id    = azurerm_virtual_network.vnet.id
   registration_enabled  = false
-  
   tags = local.common_tags
 }
 
@@ -75,7 +108,6 @@ resource "azurerm_private_dns_zone_virtual_network_link" "openai_zone_link" {
   private_dns_zone_name = azurerm_private_dns_zone.openai_zone.name
   virtual_network_id    = azurerm_virtual_network.vnet.id
   registration_enabled  = false
-  
   tags = local.common_tags
 }
 
@@ -141,30 +173,4 @@ resource "azurerm_private_endpoint" "openai_endpoint" {
   }
   
   tags = local.common_tags
-}
-
-# Network Security Groups
-resource "azurerm_network_security_group" "endpoints_nsg" {
-  name                = "nsg-endpoints-${var.project_name}-${var.environment}"
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
-
-  security_rule {
-    name                       = "AllowInboundPrivateEndpoints"
-    priority                   = 100
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range         = "*"
-    destination_port_range    = "*"
-    source_address_prefix     = "VirtualNetwork"
-    destination_address_prefix = "VirtualNetwork"
-  }
-  
-  tags = local.common_tags
-}
-
-resource "azurerm_subnet_network_security_group_association" "endpoints_nsg_association" {
-  subnet_id                 = azurerm_subnet.endpoint_subnet.id
-  network_security_group_id = azurerm_network_security_group.endpoints_nsg.id
 }

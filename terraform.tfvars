@@ -4,7 +4,7 @@
 project_name        = "dogprints"
 environment         = "dev"
 location            = "norwayeast"
-powerapps_client_ip = "YOUR_IP_ADDRESS"  # Må erstattes med faktisk IP
+powerapps_client_ip = "85.166.29.85"  # Må erstattes med faktisk IP
 
 # Tagging
 tags = {

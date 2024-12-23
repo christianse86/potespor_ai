@@ -59,11 +59,6 @@ resource "azurerm_monitor_diagnostic_setting" "storage_diagnostics" {
   metric {
     category = "Transaction"
     enabled  = true
-
-    retention_policy {
-      enabled = true
-      days    = 30
-    }
   }
 }
 

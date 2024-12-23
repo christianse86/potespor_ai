@@ -34,9 +34,9 @@ provider "azurerm" {
     }
   }
 
-  # Uncomment if you need to specify subscription
-  # subscription_id = "your-subscription-id"
-  # tenant_id       = "your-tenant-id"
+  #Uncomment if you need to specify subscription
+  subscription_id = "7a959f57-3026-4039-9682-3ae51fafad52"
+  tenant_id       = "aeba2c19-0c65-4a86-99e9-3e2550440979"
 }
 
 # Provider aliases hvis du trenger å jobbe mot flere subscriptions

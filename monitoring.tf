@@ -34,11 +34,13 @@ resource "azurerm_app_configuration" "config" {
 
 # Key Vault
 resource "azurerm_key_vault" "kv" {
-  name                = "kv-${var.project_name}-${var.environment}"
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
-  tenant_id          = data.azurerm_client_config.current.tenant_id
-  sku_name           = "standard"
+  name                       = "kv-${var.project_name}-${var.environment}"
+  location                   = azurerm_resource_group.rg.location
+  resource_group_name        = azurerm_resource_group.rg.name
+  tenant_id                 = data.azurerm_client_config.current.tenant_id
+  sku_name                  = "standard"
+  enable_rbac_authorization = true  # Påkrevd av policy
+  purge_protection_enabled  = true  # Påkrevd av policy
 
   tags = local.common_tags
 }
